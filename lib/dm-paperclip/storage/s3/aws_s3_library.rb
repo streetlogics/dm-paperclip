@@ -39,11 +39,13 @@ module Paperclip
                 :access => @s3_permissions,
               }.merge(@s3_headers)
             )
-          rescue AWS::S3::NoSuchBucket => e
-            s3_create_bucket
-            retry
           rescue AWS::S3::ResponseError => e
-            raise
+            if e.class.to_s == "AWS::S3::NoSuchBucket"
+              create_bucket
+              retry
+            else
+              raise
+            end
           end
         end
 
